@@ -1,0 +1,16 @@
+<!doctype html><meta charset="utf-8"><title>Wallet adapter verification</title>
+<h1>Wallet adapter verification</h1>
+<p id="status">Loading the bundled wallet library…</p>
+<button id="inspect" disabled>Check wallet discovery</button><pre id="result"></pre>
+<script>window.rpcCluster = 'mainnet-beta';</script>
+<script src="StreamingAssets/Solana/unity-wallet-adapter-1.2.1.js" onload="document.getElementById('status').textContent='Bundled wallet library loaded';document.getElementById('inspect').disabled=false" onerror="document.getElementById('status').textContent='Wallet library failed to load'"></script>
+<script>
+document.getElementById('inspect').onclick = async () => {
+  document.getElementById('status').textContent = 'Discovering available wallets…';
+  try {
+    const wallets = JSON.parse(await window.walletAdapterLib.getWallets()).wallets;
+    document.getElementById('result').textContent = JSON.stringify(wallets.map(({name,installed}) => ({name,installed})), null, 2);
+    document.getElementById('status').textContent = 'Wallet discovery completed: ' + wallets.length;
+  } catch (error) { document.getElementById('status').textContent = error.message; }
+};
+</script>

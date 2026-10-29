@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Suspicious Microwave Tower Defense</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; background: #090c14; color: #edf4ff; font-family: system-ui, sans-serif; }
+    #unity-canvas { display: block; width: 100%; height: 100%; outline: none; }
+    #loading { position: fixed; inset: 0; display: grid; place-content: center; gap: 18px; padding: 24px; text-align: center; background: #090c14; z-index: 2; }
+    h1 { font-size: clamp(22px, 4vw, 36px); max-width: 650px; margin: 0; }
+    button { justify-self: center; padding: 14px 32px; border: 1px solid #8af0d1; border-radius: 8px; color: #090c14; background: #8af0d1; font: inherit; font-weight: 700; cursor: pointer; }
+    progress { width: min(360px, 80vw); justify-self: center; accent-color: #8af0d1; }
+    #status { max-width: 650px; line-height: 1.5; white-space: pre-wrap; }
+    #warning { position: fixed; top: 12px; left: 12px; right: 12px; padding: 12px; background: #622c36; z-index: 3; display: none; }
+    #rotate-device { display: none; position: fixed; inset: 0; z-index: 4; padding: 32px; background: #090c14; text-align: center; place-content: center; gap: 16px; }
+    #rotate-device p { max-width: 420px; line-height: 1.5; }
+    @media (orientation: portrait) {
+      #unity-canvas { position: absolute; top: 50%; width: 100vw; height: 56.25vw; transform: translateY(-50%); pointer-events: none; }
+      #rotate-device { display: grid; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="unity-canvas" tabindex="0" aria-label="The Suspicious Microwave Tower Defense"></canvas>
+  <div id="loading">
+    <h1>Suspicious Microwave Tower Defense</h1>
+    <div id="status">Loading the game…</div>
+    <progress id="progress" max="1" value="0"></progress>
+    <button id="play" hidden>Play</button>
+  </div>
+  <div id="warning" role="alert"></div>
+  <div id="rotate-device" role="status">
+    <h1>Rotate your device</h1>
+    <p>The Suspicious Microwave plays in landscape. Turn your device sideways to continue.</p>
+  </div>
+  <script>
+    const canvas = document.getElementById('unity-canvas');
+    const status = document.getElementById('status');
+    const play = document.getElementById('play');
+    const config = {
+      dataUrl: 'Build/TheSuspiciousMicrowaveTD_WEBGL.data',
+      frameworkUrl: 'Build/TheSuspiciousMicrowaveTD_WEBGL.framework.js',
+      codeUrl: 'Build/TheSuspiciousMicrowaveTD_WEBGL.wasm',
+      streamingAssetsUrl: 'StreamingAssets',
+      companyName: "The Simulacrum",
+      productName: "Suspicious Microwave Tower Defense",
+      productVersion: "0.145",
+      autoSyncPersistentDataPath: true,
+      showBanner(message, type) {
+        console[type === 'error' ? 'error' : 'warn'](message);
+        if (type === 'error') {
+          const warning = document.getElementById('warning');
+          warning.textContent = message;
+          warning.style.display = 'block';
+        }
+      }
+    };
+    const loader = document.createElement('script');
+    loader.src = 'Build/TheSuspiciousMicrowaveTD_WEBGL.loader.js';
+    loader.onerror = () => { status.textContent = 'The game could not download. Please reload to try again.'; };
+    loader.onload = () => {
+      status.textContent = 'Ready when you are.';
+      document.getElementById('progress').hidden = true;
+      play.hidden = false;
+      play.onclick = async () => {
+        play.hidden = true;
+        document.getElementById('progress').hidden = false;
+        status.textContent = 'Starting the game…';
+        try {
+          window.unityInstance = await createUnityInstance(canvas, config, progress => {
+            document.getElementById('progress').value = progress;
+          });
+          document.getElementById('loading').style.display = 'none';
+          canvas.focus();
+        } catch (error) {
+          status.textContent = 'The game could not start. Please reload to try again.';
+          console.error(error);
+        }
+      };
+    };
+    document.body.appendChild(loader);
+  </script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+/Build/WebGL.*
+/_site/
+/.pages-preview/
+**/__pycache__/
+/hooks/
